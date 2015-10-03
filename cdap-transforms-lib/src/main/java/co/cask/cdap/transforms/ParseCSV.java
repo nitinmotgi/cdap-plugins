@@ -43,10 +43,15 @@ import java.util.List;
 @Name("CSVParser")
 @Description("Parses a CSV into a Record")
 public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
-  
   private final Config config;
+  
+  // Output Schema associated with transform output. 
   private Schema outSchema;
+  
+  // List of fields specified in the schema. 
   private List<Field> fields;
+  
+  // Format of CSV.
   private CSVFormat csvFormat = CSVFormat.DEFAULT;
 
   // This is used only for tests, otherwise this is being injected by the ingestion framework. 
