@@ -1,9 +1,8 @@
-package co.cask.cdap.transforms.parser;
+package co.cask.cdap.transforms;
 
 import co.cask.cdap.api.data.format.StructuredRecord;
 import co.cask.cdap.api.data.schema.Schema;
 import co.cask.cdap.etl.api.Transform;
-import co.cask.cdap.transforms.MockEmitter;
 
 import org.junit.Assert;
 import org.junit.Test;

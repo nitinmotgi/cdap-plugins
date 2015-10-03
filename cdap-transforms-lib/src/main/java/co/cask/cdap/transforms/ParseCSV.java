@@ -15,7 +15,7 @@
  */
 
 
-package co.cask.cdap.transforms.parser;
+package co.cask.cdap.transforms;
 
 
 import co.cask.cdap.api.annotation.Description;
@@ -49,6 +49,11 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
   private List<Field> fields;
   private CSVFormat csvFormat = CSVFormat.DEFAULT;
 
+  // This is used only for tests, otherwise this is being injected by the ingestion framework. 
+  public ParseCSV(Config config) {
+    this.config = config;
+  }
+  
   @Override
   public void initialize(TransformContext context) throws Exception {
     super.initialize(context);
@@ -98,11 +103,11 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
                                            " RFC4180 & TDF");
     }
     
-    if(!config.format.equalsIgnoreCase("DEFAULT") || !config.format.equalsIgnoreCase("EXCEL") || 
-        !config.format.equalsIgnoreCase("MYSQL") || !config.format.equalsIgnoreCase("RFC4180") || 
+    if(!config.format.equalsIgnoreCase("DEFAULT") && !config.format.equalsIgnoreCase("EXCEL") &&
+        !config.format.equalsIgnoreCase("MYSQL") && !config.format.equalsIgnoreCase("RFC4180") &&
         !config.format.equalsIgnoreCase("TDF")) {
-      throw new IllegalArgumentException("Format specified is not one of the allowed values are DEFAULT, EXCEL," +
-                                           " MYSQL, RFC4180 & TDF");
+      throw new IllegalArgumentException("Format specified is not one of the allowed values. Allowed values are " +
+                                           "DEFAULT, EXCEL, MYSQL, RFC4180 & TDF");
     }
     
     // Check if schema specified is a valid schema or no. 
@@ -171,10 +176,6 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
     }
   }
   
-  // This is used only for tests, otherwise this is being injected by the ingestion framework. 
-  public ParseCSV(Config config) {
-    this.config = config;
-  }
   
 }
 

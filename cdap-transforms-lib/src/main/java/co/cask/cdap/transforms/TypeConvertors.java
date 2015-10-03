@@ -1,4 +1,4 @@
-package co.cask.cdap.transforms.parser;
+package co.cask.cdap.transforms;
 
 import co.cask.cdap.api.data.schema.Schema;
 
