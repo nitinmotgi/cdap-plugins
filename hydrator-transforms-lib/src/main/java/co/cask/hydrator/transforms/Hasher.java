@@ -37,19 +37,11 @@ import javax.annotation.Nullable;
 
 @Plugin(type = "transform")
 @Name("Hasher")
-@Description("Masker masks string fields. Mask generated are of same length as the input field value.")
+@Description("Encodes field values using one of the digest algorithms. MD2, MD5, SHA1, SHA256, SHA384 and SHA512 are " +
+  "the supported message digest algorithms.")
 public class Hasher extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
   private String[] fieldsToHash;
-  
-  ImmutableMap<String, Boolean> allowedHash = ImmutableMap.<String, Boolean>builder()
-    .put("md2", true)
-    .put("md5", true)
-    .put("sha1", true)
-    .put("sha256", true)
-    .put("sha384", true)
-    .put("sha512", true)
-    .build();
 
   public Hasher(Config config) {
     this.config = config;
@@ -58,6 +50,8 @@ public class Hasher extends Transform<StructuredRecord, StructuredRecord> {
   @Override
   public void initialize(TransformContext context) throws Exception {
     super.initialize(context);
+    
+    // Split the fields to be hashed.
     fieldsToHash = config.fields.split(",");
   }
 
@@ -65,7 +59,10 @@ public class Hasher extends Transform<StructuredRecord, StructuredRecord> {
   public void configurePipeline(PipelineConfigurer pipelineConfigurer) throws IllegalArgumentException {
     super.configurePipeline(pipelineConfigurer);
     
-    if(!allowedHash.containsKey(config.hash.toLowerCase())) {
+    // Checks if hash specified is one of the supported types. 
+    if(!config.hash.equalsIgnoreCase("md2") && !config.hash.equalsIgnoreCase("md5") &&
+        !config.hash.equalsIgnoreCase("sha1") && !config.hash.equalsIgnoreCase("sha256") &&
+        !config.hash.equalsIgnoreCase("sha384") && !config.hash.equalsIgnoreCase("sha512")) {
       throw new IllegalArgumentException("Invalid hasher '" + config.hash + "' specified. Allowed hashers are md2, " +
                                            "md5, sha1, sha256, sha384 and sha512");  
     }
@@ -79,7 +76,28 @@ public class Hasher extends Transform<StructuredRecord, StructuredRecord> {
     for(Schema.Field field : fields) {
       String name = field.getName();
       if (okToHash(name) && field.getSchema().getType() == Schema.Type.STRING) {
-        String digest = hashTheField((String) in.get(name));
+        String value = in.get(name);
+        String digest = value;
+        switch(config.hash.toLowerCase()) {
+          case "md2":
+            digest = DigestUtils.md2Hex(value);
+            break;
+          case "md5":
+            digest = DigestUtils.md5Hex(value);
+            break;
+          case "sha1":
+            digest = DigestUtils.sha1Hex(value);
+            break;
+          case "sha256":
+            digest = DigestUtils.sha256Hex(value);
+            break;
+          case "sha384":
+            digest = DigestUtils.sha384Hex(value);
+            break;
+          case "sha512":
+            digest = DigestUtils.sha256Hex(value);
+            break;
+        }
         builder.set(name, digest);
       } else {
         builder.set(name, in.get(name));
@@ -96,28 +114,6 @@ public class Hasher extends Transform<StructuredRecord, StructuredRecord> {
     }
     return false;
   }
-
-
-  private String hashTheField (String value) {
-    String hash = config.hash.toLowerCase();
-    switch(hash) {
-      case "md2":
-        return DigestUtils.md2Hex(value);
-      case "md5":
-        return DigestUtils.md5Hex(value);
-      case "sha1":
-        return DigestUtils.sha1Hex(value);
-      case "sha256":
-        return DigestUtils.sha256Hex(value);
-      case "sha384":
-        return DigestUtils.sha384Hex(value);
-      case "sha512":
-        return DigestUtils.sha256Hex(value);
-    }
-    // We should never get here.
-    return value;
-  }
-
 
   public static class Config extends PluginConfig {
     @Name("hash")
