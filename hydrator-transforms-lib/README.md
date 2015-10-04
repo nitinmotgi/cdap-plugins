@@ -1,5 +1,7 @@
 ## Cask Hydrator Transform Plugin Collections.
 
+![alt tag](https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/screenshot.png)
+
 ### CSVParser
 
 CSVParser takes a input field and parses in to a CSV Record with CSV Parser. The CSVParser supports different CSV formats like DEFAULT, MYSQL, EXCEL, RFC4180 and TDF.
