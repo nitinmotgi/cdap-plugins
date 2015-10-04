@@ -38,8 +38,13 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.xerial.snappy.Snappy;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
+import java.util.zip.ZipInputStream;
 
 /**
  * A Transformation that parses a text into CSV Fields.
@@ -132,9 +137,10 @@ public class CSVParser2 extends Transform<StructuredRecord, StructuredRecord> {
     }
     
     // Check if the decompressor specified is one of the allowed types.
-    if(!config.decompress.equalsIgnoreCase("SNAPPY") && !config.decompress.equalsIgnoreCase("NONE")) {
+    if(!config.decompress.equalsIgnoreCase("SNAPPY") && !config.decompress.equalsIgnoreCase("NONE")
+       && !config.decompress.equalsIgnoreCase("GZIP") && !config.decompress.equalsIgnoreCase("ZIP")) {
       throw new IllegalArgumentException("Unsupported decompressor algorithm '" + config.decompress + 
-                                           "' specified. Currently supports NONE & SNAPPY");
+                                           "' specified. Currently supports NONE, SNAPPY, GZIP and ZIP");
     }
     
     // Check if schema specified is a valid schema or no. 
@@ -164,6 +170,10 @@ public class CSVParser2 extends Transform<StructuredRecord, StructuredRecord> {
     if(!config.decompress.equalsIgnoreCase("NONE")) {
      if(config.decompress.equalsIgnoreCase("SNAPPY")) {
        uncompressedPayLoad = Snappy.uncompress(decodedPayLoad);
+     } else if (config.decompress.equalsIgnoreCase("GZIP")) {
+       uncompressedPayLoad = ungzip(decodedPayLoad);
+     } else if (config.decompress.equalsIgnoreCase("ZIP")) {
+       uncompressedPayLoad = unzip(decodedPayLoad);
      }
     }
     
@@ -182,6 +192,49 @@ public class CSVParser2 extends Transform<StructuredRecord, StructuredRecord> {
     } catch (IOException e) {
 
     }
+  }
+
+  /**
+   * UnCompress payload using GZIP Algorithm
+   *
+   * @param body byte array
+   * @return decompressed bytes.
+   * @throws IOException
+   */
+  private byte[] ungzip(byte[] body) throws IOException {
+    Inflater inf = new Inflater();
+    ByteArrayInputStream bytein = new ByteArrayInputStream(body);
+    GZIPInputStream gzin = new GZIPInputStream(bytein);
+    ByteArrayOutputStream byteout = new ByteArrayOutputStream();
+
+    int res = 0;
+    byte buf[] = new byte[1024];
+    while (res >= 0) {
+      res = gzin.read(buf, 0, buf.length);
+      if (res > 0) {
+        byteout.write(buf, 0, res);
+      }
+    }
+    byte uncompressed[] = byteout.toByteArray();
+    return uncompressed;
+  }
+
+  private byte[] unzip(byte[] body) throws IOException {
+    Inflater inf = new Inflater();
+    ByteArrayInputStream bytein = new ByteArrayInputStream(body);
+    ZipInputStream gzin = new ZipInputStream(bytein);
+    ByteArrayOutputStream byteout = new ByteArrayOutputStream();
+
+    int res = 0;
+    byte buf[] = new byte[1024];
+    while (res >= 0) {
+      res = gzin.read(buf, 0, buf.length);
+      if (res > 0) {
+        byteout.write(buf, 0, res);
+      }
+    }
+    byte uncompressed[] = byteout.toByteArray();
+    return uncompressed;
   }
 
   /**
