@@ -58,5 +58,6 @@ The Hasher uses hashing algorithms to encode values of a field. Currently hasher
 
 ### Clone Row 
 The Clone Row transform creates copies or clones of a every row passed through and outputs them directly after the original row to the next stages of the pipeline.
+
 <img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/clone-rows.png" width="400">
 
