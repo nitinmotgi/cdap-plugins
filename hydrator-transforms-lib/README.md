@@ -27,6 +27,11 @@ $ cdap (http://Joltie:10000/default)> list artifacts
 $ cp $HYDRATOR_PLUGIN/resources/ui/*.json $CDAP_HOME/ui/templates/common
 ```
 
+After plugin artifact is deployed and UI configuration are in place - the plugins would appear in the Hydrator UI. 
+
+<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/transform-panel.png" width="150">
+
+
 #### Update Hydrator Transform Plugins Artifact
 
 In case you make any modifications to the hydrator-plugins JAR and you have not modified the version number, you would have delete the artifact and load the latest one.
