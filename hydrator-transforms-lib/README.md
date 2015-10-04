@@ -38,3 +38,6 @@ Following are the specification of formats:
 2. Quote('"')
 3. Record Separator("\r\n")
 4. Ignore Surrounding Spaces(true)
+
+### Masker
+The Masker masks string field. Mask generated are of same length as the input field value. A seed is used to randomly select the characters that are used for Masking. 
