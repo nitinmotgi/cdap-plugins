@@ -18,16 +18,13 @@ You can use CDAP command line interface to deploy the hydrator plugin artifacts 
 #### Deploy Hydrator Plugins Artifact to CDAP
 ```
 $ cdap (http://Joltie:10000/default)> load artifact $HYDRATOR_PLUGIN/target/hydrator-transforms-lib-1.0-SNAPSHOT.jar \
---config-file $HYDRATOR_PLUGIN/resources/hydrator-transforms-lib.json
+--config-file $HYDRATOR_PLUGIN/resources/plugin/hydrator-transforms-lib.json
 $ cdap (http://Joltie:10000/default)> list artifacts
 ```
 
 #### Deploy UI Configuration
 ```
-$ cp $HYDRATOR_PLUGIN/resources/CSVParser.json $CDAP_HOME/ui/templates/common
-$ cp $HYDRATOR_PLUGIN/resources/CSVParser2.json $CDAP_HOME/ui/templates/common
-$ cp $HYDRATOR_PLUGIN/resources/Masker.json $CDAP_HOME/ui/templates/common
-$ cp $HYDRATOR_PLUGIN/resources/Hasher.json $CDAP_HOME/ui/templates/common
+$ cp $HYDRATOR_PLUGIN/resources/ui/*.json $CDAP_HOME/ui/templates/common
 ```
 
 #### Update Hydrator Transform Plugins Artifact
@@ -37,7 +34,7 @@ In case you make any modifications to the hydrator-plugins JAR and you have not 
 ```
 $ cdap (http://Joltie:10000/default)> delete artifact hydrator-transforms-lib 1.0-SNAPSHOT
 $ cdap (http://Joltie:10000/default)> load artifact $HYDRATOR_PLUGIN/target/hydrator-transforms-lib-1.0-SNAPSHOT.jar \
---config-file $HYDRATOR_PLUGIN/resources/hydrator-transforms-lib.json
+--config-file $HYDRATOR_PLUGIN/resources/plugin/hydrator-transforms-lib.json
 $ cdap (http://Joltie:10000/default)> list artifacts
 ```
 
@@ -58,3 +55,6 @@ The Masker masks string field. Mask generated are of same length as the input fi
 
 ### Hasher
 The Hasher uses hashing algorithms to encode values of a field. Currently hasher supports MD2, MD5, SHA1, SHA256, SHA384, SHA512 algorithms for hashing a field. It's mainly used for encoding sensitive data like credit card numbers, social security numbers, and PII fields.
+
+### Clone Row 
+The Clone Row transform creates copies or clones of a every row passed through and outputs them directly after the original row to the next stages of the pipeline.
