@@ -18,7 +18,7 @@
           "label": "Formats",
           "properties": {
             "values" : [ "DEFAULT", "EXCEL", "MYSQL", "RFC4180", "TDF" ],
-            "delimiter": "DEFAULT"
+            "default": "DEFAULT"
           }
         },
         "schema" : {

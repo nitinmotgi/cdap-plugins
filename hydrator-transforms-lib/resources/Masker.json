@@ -1,0 +1,26 @@
+{
+  "id": "Masker",
+  "groups": {
+    "position": [ "group1" ],
+    "group1": {
+      "display": "Masker Configuration",
+      "position": [ "seed", "fields" ],
+      "fields": {
+        "seed": {
+          "widget": "textbox",
+          "label": "Masker Seed",
+          "properties": {
+            "width": "large"
+          }
+        },
+        "fields": {
+          "widget": "csv",
+          "label": "Fields",
+          "properties": {
+            "delimiter": ","
+          }
+        }
+      }
+    }
+  }
+}
