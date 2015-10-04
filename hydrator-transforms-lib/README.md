@@ -50,7 +50,8 @@ CSVParser takes a input field and parses in to a CSV Record with CSV Parser. The
 ### CSVParser2
 CSVParser takes a input field to parse it as CSV Record, but it now supports first the ability to decode the field using either BASE64, BASE32 or HEX and then apply decompression on the payload using SNAPPY, GIP or ZIP algorithms and then parse the record as CSV. There are some use-cases where payloads are Compressed, Hex encoded and are CSV records. 
 
-<img src="https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/csvparser2-0.png" width="400"><img src="https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/csvparser2-1.png" width="400"><img src="https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/csvparser2-2.png" width="400">
+
+<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-0.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-1.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-2.png" width="400">
 
 ### Masker
 The Masker masks string field. Mask generated are of same length as the input field value. A seed is used to randomly select the characters that are used for Masking. 
