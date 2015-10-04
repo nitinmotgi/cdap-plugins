@@ -2,6 +2,45 @@
 
 ![alt tag](https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/screenshot.png)
 
+### Build Instructions
+```
+$ git clone https://github.com/nitinmotgi/hydrator-plugins.git
+$ cd hydrator-plugins
+$ export HYDRATOR_PLUGIN=`pwd`
+$ mvn clean package
+```
+
+### Deploying Artifact to CDAP
+
+You can use CDAP command line interface to deploy the hydrator plugin artifacts to CDAP. Once, the artifact is deployed it would be available in hydrator as a plugin under "Transforms" panel. 
+
+#### Deploy Hydrator Plugins Artifact
+```
+$ cdap (http://Joltie:10000/default)> load artifact $HYDRATOR_PLUGIN/target/hydrator-transforms-lib-1.0-SNAPSHOT.jar \
+--config-file $HYDRATOR_PLUGIN/resources/hydrator-transforms-lib.json
+$ cdap (http://Joltie:10000/default)> list artifacts
+```
+
+#### Deploy UI Configuration
+```
+$ cp $HYDRATOR_PLUGIN/resources/CSVParser.json $CDAP_HOME/ui/templates/common
+$ cp $HYDRATOR_PLUGIN/resources/CSVParser2.json $CDAP_HOME/ui/templates/common
+$ cp $HYDRATOR_PLUGIN/resources/Masker.json $CDAP_HOME/ui/templates/common
+$ cp $HYDRATOR_PLUGIN/resources/Hasher.json $CDAP_HOME/ui/templates/common
+```
+
+#### Update Hydrator Plugins
+
+In case you make any modifications to the hydrator-plugins JAR and you have not modified the version number, you would have delete the artifact and load the latest one.
+
+```
+$ cdap (http://Joltie:10000/default)> delete artifact hydrator-transforms-lib 1.0-SNAPSHOT
+$ cdap (http://Joltie:10000/default)> load artifact $HYDRATOR_PLUGIN/target/hydrator-transforms-lib-1.0-SNAPSHOT.jar \
+--config-file $HYDRATOR_PLUGIN/resources/hydrator-transforms-lib.json
+```
+
+## Available Plugins
+
 ### CSVParser
 
 CSVParser takes a input field and parses in to a CSV Record with CSV Parser. The CSVParser supports different CSV formats like DEFAULT, MYSQL, EXCEL, RFC4180 and TDF.
