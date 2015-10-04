@@ -48,7 +48,7 @@ $ cdap (http://Joltie:10000/default)> list artifacts
 CSVParser takes a input field and parses in to a CSV Record with CSV Parser. The CSVParser supports different CSV formats like DEFAULT, MYSQL, EXCEL, RFC4180 and TDF.
 
 ### CSVParser2
-CSVParser takes a input field to parse it as CSV Record, but it now supports first the ability to decode the field using either BASE64, BASE32 or HEX and then apply decompression on the payload using SNAPPY and then parse the record. There are some use-cases where payloads are Compressed, Hex encoded and are CSV records. 
+CSVParser takes a input field to parse it as CSV Record, but it now supports first the ability to decode the field using either BASE64, BASE32 or HEX and then apply decompression on the payload using SNAPPY, GIP or ZIP algorithms and then parse the record as CSV. There are some use-cases where payloads are Compressed, Hex encoded and are CSV records. 
 
 <img src="https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/csvparser2-0.png" width="400"><img src="https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/csvparser2-1.png" width="400"><img src="https://github.com/nitinmotgi/hydrator-plugins/blob/master/hydrator-transforms-lib/resources/csvparser2-2.png" width="400">
 
