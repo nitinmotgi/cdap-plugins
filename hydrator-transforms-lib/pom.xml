@@ -18,11 +18,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>co.cask.cdap</groupId>
-  <artifactId>cdap-transforms-lib</artifactId>
+  <groupId>co.cask.hydrator</groupId>
+  <artifactId>hydrator-transforms-lib</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
-  <name>Collection of useful CDAP ETL Transformations.</name>
+  <name>Collection of useful Cask Hydrator Plugins.</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,7 +94,7 @@
               <Embed-Transitive>true</Embed-Transitive>
               <Embed-Directory>lib</Embed-Directory>
               <!--Only @Plugin classes in the export packages will be included as plugin-->
-              <Export-Package>co.cask.cdap.transforms.*</Export-Package>
+              <Export-Package>co.cask.hydrator.transforms.*</Export-Package>
             </instructions>
           </configuration>
           <executions>
