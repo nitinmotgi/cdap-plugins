@@ -1,0 +1,20 @@
+{
+  "id": "JSONWriter",
+  "label": "JSON Writer",
+  "groups": {
+    "position": [ "group1" ],
+    "group1": {
+      "display": "JSON Parser",
+      "position": [ "schema" ],
+      "fields": {
+        "schema" : {
+          "widget": "schema",
+          "label": "Schema",
+          "description" : "Schema of output JSON",
+          "schema-types" : [ "string" ],
+          "schema-default-type" : "string"
+        }
+      }
+    }
+  }
+}
