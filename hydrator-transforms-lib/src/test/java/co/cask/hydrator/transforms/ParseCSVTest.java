@@ -19,8 +19,21 @@ package co.cask.hydrator.transforms;
 import co.cask.cdap.api.data.format.StructuredRecord;
 import co.cask.cdap.api.data.schema.Schema;
 import co.cask.cdap.etl.api.Transform;
+import com.clearspring.analytics.util.Lists;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.core.LowerCaseTokenizer;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.analysis.core.StopFilter;
+import org.apache.lucene.analysis.en.PorterStemFilter;
+import org.apache.lucene.analysis.standard.ClassicFilter;
+import org.apache.lucene.analysis.standard.StandardFilter;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.analysis.util.CharArraySet;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 
 public class ParseCSVTest {
@@ -151,5 +164,31 @@ public class ParseCSVTest {
     transform.transform(StructuredRecord.builder(INPUT1)
                           .set("body", ",stringA,3,4.32,true").build(), emitter);
   }
+//
+//  @Test
+//  public void testFoo() throws Exception {
+//    List<String> words = Lists.newArrayList();
+//    words.add("this");
+//    words.add("the");
+//    words.add("is");
+//    words.add("a");
+//    words.add("of");
+//    CharArraySet stopWords = StopFilter.makeStopSet(words);
+//
+//    List<String> result = Lists.newArrayList();
+//    Analyzer analyzer = new SimpleAnalyzer();
+//    TokenStream stream = analyzer.tokenStream(null, "This is a great example of text analysis");
+//    stream = new StandardFilter(stream);
+//    stream = new StopFilter(stream, stopWords);
+//    stream = new PorterStemFilter(stream);
+//
+//    stream.reset();
+//    while(stream.incrementToken()) {
+//      result.add(stream.getAttribute(CharTermAttribute.class).toString());
+//    }
+//    stream.end();
+//    stream.close();
+//    Assert.assertEquals(1, result.size());
+//  }
 
 }

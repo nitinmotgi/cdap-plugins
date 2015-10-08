@@ -8,7 +8,7 @@
       "fields": {
         "field": {
           "widget": "textbox",
-          "label": "Input field to Parse",
+          "label": "Input field.",
           "properties": {
             "width": "large"
           }

@@ -18,7 +18,7 @@
             "widget": "select",
             "label" : "Decompress Payload",
             "properties": {
-               "values" : [ "NONE", "SNAPPY", "GZIP" ],
+               "values" : [ "NONE", "SNAPPY", "GZIP", "ZIP" ],
                "default": "NONE"
             }
          }

@@ -5,6 +5,9 @@
 target/
 *.iml
 .idea/
+.DS_Store
+*.tgz
+*.gz
 
 # Package Files #
 *.jar

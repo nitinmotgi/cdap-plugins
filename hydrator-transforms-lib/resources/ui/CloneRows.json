@@ -10,7 +10,7 @@
           "widget": "number",
           "label": "Copies of record",
           "properties": {
-            "width": "large"
+            "width": "large",
             "default": 1
           },
           "max": 99999,

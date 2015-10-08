@@ -67,7 +67,6 @@ public class CloneRows extends Transform<StructuredRecord, StructuredRecord> {
   public static class Config extends PluginConfig {
     @Name("copies")
     @Description("Specifies number of copies to be made of every row.")
-    @Nullable
     private final int copies;
     
     public Config(int copies) {
