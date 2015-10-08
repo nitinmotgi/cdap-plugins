@@ -55,6 +55,11 @@ CSVParser takes a input field to parse it as CSV Record, but it now supports fir
 
 <img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-0.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-1.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-2.png" width="400">
 
+### JSON Parser
+Parses a JSON structure into a `StructuredRecord`. The field names in JSON have to be the same as those defined in the output schema. 
+
+<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/jsonparser.png" width="400">
+
 ### Masker
 The Masker masks string field. Mask generated are of same length as the input field value. A seed is used to randomly select the characters that are used for Masking. 
 
