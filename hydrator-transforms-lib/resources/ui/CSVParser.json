@@ -4,7 +4,7 @@
     "position": [ "group1" ],
     "group1": {
       "display": "CSV Parser",
-      "position": [ "field", "format", "schema" ],
+      "position": [ "field", "format", "delimiter", "schema" ],
       "fields": {
         "field": {
           "widget": "textbox",
@@ -19,6 +19,14 @@
           "properties": {
             "values" : [ "DEFAULT", "EXCEL", "MYSQL", "RFC4180", "TDF" ],
             "default": "DEFAULT"
+          }
+        },
+        "delimiter": {
+          "widget": "select",
+          "label": "Delimiter",
+          "properties": {
+            "values" : [ ",", "|" ],
+            "default": ","
           }
         },
         "schema" : {
