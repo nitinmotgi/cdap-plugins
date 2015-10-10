@@ -55,10 +55,13 @@ public class ParseCSVTest {
                                                         Schema.Field.of("d", Schema.of(Schema.Type.DOUBLE)),
                                                         Schema.Field.of("e", Schema.of(Schema.Type.BOOLEAN)));
 
+
   @Test
   public void testDefaultCSVParser() throws Exception {
     String s = OUTPUT1.toString();
-    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", OUTPUT1.toString());
+    String commaDelimiter = ",";
+
+    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", commaDelimiter, OUTPUT1.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new ParseCSV(config);
     transform.initialize(null);
 
@@ -122,7 +125,7 @@ public class ParseCSVTest {
     
     // Test with records supporting different types. 
     emitter.clear();
-    ParseCSV.Config config1 = new ParseCSV.Config("DEFAULT", "body", OUTPUT2.toString());
+    ParseCSV.Config config1 = new ParseCSV.Config("DEFAULT", "body", commaDelimiter, OUTPUT2.toString());
     Transform<StructuredRecord, StructuredRecord> transform1 = new ParseCSV(config1);
     transform1.initialize(null);
     
@@ -138,7 +141,9 @@ public class ParseCSVTest {
   @Test(expected=RuntimeException.class)
   public void testDoubleException() throws Exception {
     MockEmitter<StructuredRecord> emitter = new MockEmitter<>();
-    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", OUTPUT2.toString());
+    String commaDelimiter = ",";
+
+    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", commaDelimiter, OUTPUT2.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new ParseCSV(config);
     transform.initialize(null);
     transform.transform(StructuredRecord.builder(INPUT1)
@@ -148,7 +153,9 @@ public class ParseCSVTest {
   @Test(expected=RuntimeException.class)
   public void testIntException() throws Exception {
     MockEmitter<StructuredRecord> emitter = new MockEmitter<>();
-    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", OUTPUT2.toString());
+    String commaDelimiter = ",";
+
+    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", commaDelimiter, OUTPUT2.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new ParseCSV(config);
     transform.initialize(null);
     transform.transform(StructuredRecord.builder(INPUT1)
@@ -158,7 +165,9 @@ public class ParseCSVTest {
   @Test(expected=RuntimeException.class)
   public void testLongException() throws Exception {
     MockEmitter<StructuredRecord> emitter = new MockEmitter<>();
-    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", OUTPUT2.toString());
+    String commaDelimiter = ",";
+
+    ParseCSV.Config config = new ParseCSV.Config("DEFAULT", "body", commaDelimiter, OUTPUT2.toString());
     Transform<StructuredRecord, StructuredRecord> transform = new ParseCSV(config);
     transform.initialize(null);
     transform.transform(StructuredRecord.builder(INPUT1)

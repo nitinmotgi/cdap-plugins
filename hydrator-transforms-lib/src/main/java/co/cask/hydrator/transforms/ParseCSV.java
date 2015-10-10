@@ -54,6 +54,9 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
   // Format of CSV.
   private CSVFormat csvFormat = CSVFormat.DEFAULT;
 
+  // CSV delimiter
+  private String csvDelimiter = null;
+
   // This is used only for tests, otherwise this is being injected by the ingestion framework. 
   public ParseCSV(Config config) {
     this.config = config;
@@ -62,7 +65,8 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
   @Override
   public void initialize(TransformContext context) throws Exception {
     super.initialize(context);
-    
+
+    csvDelimiter = config.delimiter;
     String csvFormatString = config.format.toLowerCase();
     switch(csvFormatString) {
       case "default":
@@ -89,6 +93,7 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
         throw new IllegalArgumentException("Format {} specified is not one of the allowed format. Allowed formats are" +
                                              "DEFAULT, EXCEL, MYSQL, RFC4180 and TDF");
     }
+
 
     try {
       outSchema = Schema.parseJson(config.schema);
@@ -131,7 +136,7 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
     
     // Parse the text as CSV and emit it as structured record.
     try {
-      CSVParser parser = CSVParser.parse(body, csvFormat);
+      CSVParser parser = CSVParser.parse(body, csvFormat.withDelimiter(csvDelimiter.charAt(0)));
       List<CSVRecord> records = parser.getRecords();
       for(CSVRecord record : records ) {
         if(fields.size() == record.size()) {
@@ -161,23 +166,28 @@ public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
    * Configuration for the plugin.
    */
   public static class Config extends PluginConfig {
-    
+
     @Name("format")
     @Description("Specify one of the predefined formats. DEFAULT, EXCEL, MYSQL, RFC4180 & TDF are supported formats.")
     private final String format;
-    
+
     @Name("field")
     @Description("Specify the field that should be used for parsing into CSV.")
     private final String field;
-    
+
+    @Name("delimiter")
+    @Description("Specify a field delimiter (defaults to comma).")
+    private final String delimiter;
+
     @Name("schema")
     @Description("Specifies the schema that has to be output.")
     private final String schema;
-    
-    public Config(String format, String field, String schema) {
+
+    public Config(String format, String field, String delimiter, String schema) {
       this.format = format;
       this.field = field;
-      this.schema = schema;
+      this.delimiter = delimiter;
+        this.schema = schema;
     }
   }
   
