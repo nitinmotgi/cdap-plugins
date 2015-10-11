@@ -60,6 +60,11 @@ Parses a JSON structure into a `StructuredRecord`. The field names in JSON have 
 
 <img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/jsonparser.png" width="400">
 
+### JSON Writer
+
+Writes a `StructuredRecord` as a JSON to the output. 
+
+
 ### Masker
 The Masker masks string field. Mask generated are of same length as the input field value. A seed is used to randomly select the characters that are used for Masking. 
 
