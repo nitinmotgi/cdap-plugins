@@ -53,12 +53,8 @@ CSVParser takes a input field and parses in to a CSV Record with CSV Parser. The
 CSVParser takes a input field to parse it as CSV Record, but it now supports first the ability to decode the field using either BASE64, BASE32 or HEX and then apply decompression on the payload using SNAPPY, GIP or ZIP algorithms and then parse the record as CSV. There are some use-cases where payloads are Compressed, Hex encoded and are CSV records. 
 
 
-<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-0.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-1.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-2.png" width="400">
-
 ### JSON Parser
 Parses a JSON structure into a `StructuredRecord`. The field names in JSON have to be the same as those defined in the output schema. 
-
-<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/jsonparser.png" width="400">
 
 ### JSON Writer
 
@@ -76,8 +72,6 @@ The Hasher uses hashing algorithms to encode values of a field. Currently hasher
 
 ### Clone Row 
 The Clone Row transform creates copies or clones of a every row passed through and outputs them directly after the original row to the next stages of the pipeline.
-
-<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/clone-rows.png" width="400">
 
 ## License and Trademarks
 
