@@ -1,11 +1,16 @@
 {
-  "id": "JSONWriter",
+  "id": "Encoder",
   "groups": {
     "position": [ "group1" ],
     "group1": {
-      "display": "JSON Parser",
-      "position": [ "schema" ],
+      "display": "Encode",
+      "position": [ "encode", "schema" ],
       "fields": {
+        "encode" : {
+          "widget" : "textbox",
+          "label" : "Encode Fields",
+          "description" : "Encode fields <field>:<encode-type>[, <field>:<encode-type]*"
+        },
         "schema" : {
           "widget": "schema",
           "label": "Schema",
