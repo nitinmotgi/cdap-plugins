@@ -67,6 +67,18 @@ The Masker masks string field. Mask generated are of same length as the input fi
 ### Stream Formatter
 Prepares a structured record to be written to a CDAP Stream. It supports writing in CSV, TSV, PSV and JSON format to a stream. Also, supports specifying header fields.
 
+### Encoder
+Encodes fields in the structured record using STRING_BASE64, BASE64, STRING_BASE32, BASE32 and HEX. 
+
+### Decoder
+Decodes fields in the structured record using STRING_BASE64, BASE64, STRING_BASE32, BASE32 and HEX. 
+
+### Compressor
+Compresses payload specified in structured record using SNAPPY, ZIP & GZIP.
+
+### Decompressor
+Decompresses the compresse payload specified in structured record using SNAPPY, ZIP & GZIP.
+
 ### Hasher
 The Hasher uses hashing algorithms to encode values of a field. Currently hasher supports MD2, MD5, SHA1, SHA256, SHA384, SHA512 algorithms for hashing a field. It's mainly used for encoding sensitive data like credit card numbers, social security numbers, and PII fields.
 
