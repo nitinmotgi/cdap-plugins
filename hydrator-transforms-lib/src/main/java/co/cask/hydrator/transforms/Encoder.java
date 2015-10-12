@@ -46,7 +46,7 @@ import java.util.Map;
 @Plugin(type = "transform")
 @Name("Encoder")
 @Description("Encodes the input field(s) using Base64, Base32 or Hex")
-public class Encoder extends Transform<StructuredRecord, StructuredRecord> {
+public final class Encoder extends Transform<StructuredRecord, StructuredRecord> {
   private static final Logger LOG = LoggerFactory.getLogger(Encoder.class);
   private final Config config;
 

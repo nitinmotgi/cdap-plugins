@@ -20,7 +20,6 @@ package co.cask.hydrator.transforms;
 import co.cask.cdap.api.annotation.Description;
 import co.cask.cdap.api.annotation.Name;
 import co.cask.cdap.api.annotation.Plugin;
-import co.cask.cdap.api.common.Bytes;
 import co.cask.cdap.api.data.format.StructuredRecord;
 import co.cask.cdap.api.data.schema.Schema;
 import co.cask.cdap.api.plugin.PluginConfig;
@@ -28,18 +27,16 @@ import co.cask.cdap.etl.api.Emitter;
 import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
 import co.cask.cdap.etl.api.TransformContext;
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 
 @Plugin(type = "transform")
 @Name("Hasher")
 @Description("Encodes field values using one of the digest algorithms. MD2, MD5, SHA1, SHA256, SHA384 and SHA512 are " +
   "the supported message digest algorithms.")
-public class Hasher extends Transform<StructuredRecord, StructuredRecord> {
+public final class Hasher extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
   private String[] fieldsToHash;
 

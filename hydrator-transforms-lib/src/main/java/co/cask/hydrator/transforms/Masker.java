@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 @Plugin(type = "transform")
 @Name("Masker")
 @Description("Masker masks string fields. Mask generated are of same length as the input field value.")
-public class Masker extends Transform<StructuredRecord, StructuredRecord> {
+public final class Masker extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
   private String[] fieldsToMask;
   private long seed = System.currentTimeMillis();

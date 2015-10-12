@@ -9,22 +9,11 @@ import co.cask.cdap.etl.api.Emitter;
 import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
 import co.cask.cdap.etl.api.TransformContext;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.core.SimpleAnalyzer;
-import org.apache.lucene.analysis.core.StopFilter;
-import org.apache.lucene.analysis.en.PorterStemFilter;
-import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
 
 @Plugin(type = "transform")
 @Name("Tokenizer")
 @Description("Tokenizes the string.")
-public class Tokenizer extends Transform<StructuredRecord, StructuredRecord> {
+public final class Tokenizer extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
   
   public Tokenizer(Config config) {

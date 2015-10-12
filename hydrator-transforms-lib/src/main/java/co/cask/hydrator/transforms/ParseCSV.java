@@ -23,12 +23,12 @@ import co.cask.cdap.api.annotation.Name;
 import co.cask.cdap.api.annotation.Plugin;
 import co.cask.cdap.api.data.format.StructuredRecord;
 import co.cask.cdap.api.data.schema.Schema;
+import co.cask.cdap.api.data.schema.Schema.Field;
 import co.cask.cdap.api.plugin.PluginConfig;
 import co.cask.cdap.etl.api.Emitter;
 import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
 import co.cask.cdap.etl.api.TransformContext;
-import co.cask.cdap.api.data.schema.Schema.Field;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -42,7 +42,7 @@ import java.util.List;
 @Plugin(type = "transform")
 @Name("CSVParser")
 @Description("Parses a CSV into a Record")
-public class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
+public final class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
   
   // Output Schema associated with transform output. 

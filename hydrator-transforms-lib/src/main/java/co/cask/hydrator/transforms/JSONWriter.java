@@ -16,7 +16,6 @@
 
 package co.cask.hydrator.transforms;
 
-
 import co.cask.cdap.api.annotation.Description;
 import co.cask.cdap.api.annotation.Name;
 import co.cask.cdap.api.annotation.Plugin;
@@ -28,7 +27,6 @@ import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
 import co.cask.cdap.etl.api.TransformContext;
 import co.cask.cdap.etl.common.StructuredRecordStringConverter;
-import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,21 +34,33 @@ import java.util.List;
 @Plugin(type = "transform")
 @Name("JSONWriter")
 @Description("Writes JSON from the Structured record.")
-public class JSONWriter extends Transform<StructuredRecord, StructuredRecord> {
+public final class JSONWriter extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
-  private Gson gson;
+  
+  // Output schema specified during configuration.
   private Schema outSchema;
+  
+  // Type of the field in the output schema where the JSON would be written to. 
+  // Allows only BYTE or STRING fields. 
+  private Schema.Type type;
 
+  // Required only for testing.
   public JSONWriter(Config config) {
     this.config = config;
   }
 
+  /**
+   * Initializes the plugin by parsing the schema JSON. 
+   *  
+   * @param context Context of transformation.
+   * @throws Exception If Schema JSON is invalid. 
+   */
   @Override
   public void initialize(TransformContext context) throws Exception {
     super.initialize(context);
-    gson = new Gson();
     try {
       outSchema = Schema.parseJson(config.schema);
+      type = outSchema.getFields().get(0).getSchema().getType();
     } catch (IOException e) {
       throw new IllegalArgumentException("Output Schema specified is not a valid JSON. Please check the Schema JSON");
     }
@@ -62,14 +72,20 @@ public class JSONWriter extends Transform<StructuredRecord, StructuredRecord> {
     try {
       Schema out = Schema.parseJson(config.schema);
       List<Schema.Field> fields = out.getFields();
+      
+      // For this plugin, the output schema needs to have only one field and it should 
+      // be of type BYTES or STRING.
       if (fields.size() > 1) {
         throw new IllegalArgumentException("Only one output field should exist for this transform and it should " +
                                              "ne of type String");  
       }
       
-      if(fields.get(0).getSchema().getType() != Schema.Type.STRING) {
+      // Check to make sure the field type specified in the output is only of type
+      // STRING or BYTES.
+      if(fields.get(0).getSchema().getType() != Schema.Type.STRING && 
+        fields.get(0).getSchema().getType() != Schema.Type.BYTES) {
         throw new IllegalArgumentException("Output field name should be of type String. Please change type to " +
-                                             "String");
+                                             "String or Bytes");
       }
     } catch (IOException e) {
       throw new IllegalArgumentException("Output Schema specified is not a valid JSON. Please check the Schema JSON");
@@ -78,11 +94,23 @@ public class JSONWriter extends Transform<StructuredRecord, StructuredRecord> {
 
   @Override
   public void transform(StructuredRecord input, Emitter<StructuredRecord> emitter) throws Exception {
-    StructuredRecord record = StructuredRecord.builder(outSchema)
-      .set(outSchema.getFields().get(0).getName(), StructuredRecordStringConverter.toJsonString(input)).build();
-    emitter.emit(record);
+    StructuredRecord.Builder record = StructuredRecord.builder(outSchema);
+    
+    // Convert the structured record to JSON.
+    String outputRecord = StructuredRecordStringConverter.toJsonString(input);
+    
+    // Depending on the output field type emit it as string or bytes.
+    if (type == Schema.Type.BYTES) {
+      record.set(outSchema.getFields().get(0).getName(), outputRecord.getBytes());
+    } else if (type == Schema.Type.STRING) {
+      record.set(outSchema.getFields().get(0).getName(), outputRecord);
+    }
+    emitter.emit(record.build());
   }
 
+  /**
+   * JSON Writer Plugin Configuration.
+   */
   public static class Config extends PluginConfig {
     @Name("schema")
     @Description("Output schema")

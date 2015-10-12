@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 @Plugin(type = "transform")
 @Name("StreamFormatter")
 @Description("Formats the data from Structured Record to CDAP Stream format.")
-public class StreamFormatter extends Transform<StructuredRecord, StructuredRecord> {
+public final class StreamFormatter extends Transform<StructuredRecord, StructuredRecord> {
   private static final Logger LOG = LoggerFactory.getLogger(StreamFormatter.class);
   private final Config config;
   private Gson gson;

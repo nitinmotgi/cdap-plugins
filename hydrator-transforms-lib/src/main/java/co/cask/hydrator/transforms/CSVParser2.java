@@ -52,7 +52,7 @@ import java.util.zip.ZipInputStream;
 @Plugin(type = "transform")
 @Name("CSVParser2")
 @Description("Decodes, Decompresses and Parses CSV Records.")
-public class CSVParser2 extends Transform<StructuredRecord, StructuredRecord> {
+public final class CSVParser2 extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
 
   // Output Schema associated with transform output.

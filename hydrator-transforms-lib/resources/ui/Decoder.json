@@ -6,7 +6,7 @@
       "display": "Decoder",
       "position": [ "decode", "schema" ],
       "fields": {
-        "encode" : {
+        "decode" : {
           "widget" : "textbox",
           "label" : "Decode Fields",
           "description" : "Encode fields <field>:<encode-type>[, <field>:<encode-type]*"

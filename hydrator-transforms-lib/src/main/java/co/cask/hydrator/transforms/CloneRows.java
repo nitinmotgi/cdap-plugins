@@ -26,18 +26,16 @@ import co.cask.cdap.api.plugin.PluginConfig;
 import co.cask.cdap.etl.api.Emitter;
 import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
-import co.cask.cdap.etl.api.TransformContext;
-import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.List;
-import javax.annotation.Nullable;
 
 @Plugin(type = "transform")
 @Name("CloneRows")
 @Description("Creates copies (clones) of a row and outputs them directly after the original row to the next steps.")
-public class CloneRows extends Transform<StructuredRecord, StructuredRecord> {
+public final class CloneRows extends Transform<StructuredRecord, StructuredRecord> {
   private final Config config;
 
+  // Required only for testing.
   public CloneRows(Config config) {
     this.config = config;
   }
@@ -64,6 +62,9 @@ public class CloneRows extends Transform<StructuredRecord, StructuredRecord> {
     }
   }
 
+  /**
+   * Clone rows plugin configuration.
+   */
   public static class Config extends PluginConfig {
     @Name("copies")
     @Description("Specifies number of copies to be made of every row.")

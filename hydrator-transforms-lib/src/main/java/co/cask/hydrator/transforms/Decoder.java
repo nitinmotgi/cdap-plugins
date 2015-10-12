@@ -46,7 +46,7 @@ import java.util.Map;
 @Plugin(type = "transform")
 @Name("Decoder")
 @Description("Decodes the input field(s) using Base64, Base32 or Hex")
-public class Decoder extends Transform<StructuredRecord, StructuredRecord> {
+public final class Decoder extends Transform<StructuredRecord, StructuredRecord> {
   private static final Logger LOG = LoggerFactory.getLogger(Decoder.class);
   private final Config config;
 
@@ -82,7 +82,7 @@ public class Decoder extends Transform<StructuredRecord, StructuredRecord> {
       
       String field = params[0];
       String type = params[1].toUpperCase();
-      EncodeDecodeType eType = EncodeDecodeType.BASE64;
+      EncodeDecodeType eType;
       
       switch(type) {
         case "BASE64":
