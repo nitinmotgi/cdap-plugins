@@ -53,12 +53,8 @@ CSVParser takes a input field and parses in to a CSV Record with CSV Parser. The
 CSVParser takes a input field to parse it as CSV Record, but it now supports first the ability to decode the field using either BASE64, BASE32 or HEX and then apply decompression on the payload using SNAPPY, GIP or ZIP algorithms and then parse the record as CSV. There are some use-cases where payloads are Compressed, Hex encoded and are CSV records. 
 
 
-<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-0.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-1.png" width="400"><img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/csvparser2-2.png" width="400">
-
 ### JSON Parser
 Parses a JSON structure into a `StructuredRecord`. The field names in JSON have to be the same as those defined in the output schema. 
-
-<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/jsonparser.png" width="400">
 
 ### JSON Writer
 
@@ -71,13 +67,23 @@ The Masker masks string field. Mask generated are of same length as the input fi
 ### Stream Formatter
 Prepares a structured record to be written to a CDAP Stream. It supports writing in CSV, TSV, PSV and JSON format to a stream. Also, supports specifying header fields.
 
+### Encoder
+Encodes fields in the structured record using STRING_BASE64, BASE64, STRING_BASE32, BASE32 and HEX. 
+
+### Decoder
+Decodes fields in the structured record using STRING_BASE64, BASE64, STRING_BASE32, BASE32 and HEX. 
+
+### Compressor
+Compresses payload specified in structured record using SNAPPY, ZIP & GZIP.
+
+### Decompressor
+Decompresses the compresse payload specified in structured record using SNAPPY, ZIP & GZIP.
+
 ### Hasher
 The Hasher uses hashing algorithms to encode values of a field. Currently hasher supports MD2, MD5, SHA1, SHA256, SHA384, SHA512 algorithms for hashing a field. It's mainly used for encoding sensitive data like credit card numbers, social security numbers, and PII fields.
 
 ### Clone Row 
 The Clone Row transform creates copies or clones of a every row passed through and outputs them directly after the original row to the next stages of the pipeline.
-
-<img src="https://raw.githubusercontent.com/nitinmotgi/hydrator-plugins/master/hydrator-transforms-lib/resources/clone-rows.png" width="400">
 
 ## License and Trademarks
 
