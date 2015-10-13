@@ -1,5 +1,7 @@
 TODOs
 =====
+* Add a lot of test cases.
+* Move it to cdap-plugins repo. 
 * Would be good to have the ability to get the input schema and output schema
   configured. This would allow one to perform validation of mappings during 
   configuration phase. 
