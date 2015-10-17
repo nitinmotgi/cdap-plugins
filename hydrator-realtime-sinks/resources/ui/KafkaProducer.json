@@ -1,0 +1,56 @@
+{
+  "id": "KafkaProducer",
+  "groups": {
+    "position": [ "group1", "group2" ],
+    "group1": {
+      "display": "Kafka Producer Config",
+      "position": [ "brokerlist", "requireacks", "topics" ],
+      "fields": {
+        "brokerlist": {
+          "widget": "csv",
+          "label": "Zookeeper Qourum",
+          "properties": {
+            "delimiter": ","
+          }
+        },
+        "requireacks": {
+          "widget": "select",
+          "label": "Acknowledge Message",
+          "properties": {
+            "values" : [ "TRUE", "FALSE" ],
+            "default": "FALSE"
+          }
+        },
+        "topics": {
+          "widget": "csv",
+          "label": "Kafka Topics",
+          "properties": {
+            "delimiter": ","
+          }
+        }
+      }
+    },
+    "group2" : {
+      "display": "Message Config",
+      "position": [ "partitionfield", "key", "format" ],
+      "fields": {
+        "partitionfield": {
+          "widget": "textbox",
+          "label": "Partition Field"
+        },
+        "key": {
+          "widget": "textbox",
+          "label": "Message Key field"
+        },
+        "format": {
+          "widget": "select",
+          "label": "Message Format",
+          "properties": {
+            "values": [ "JSON", "CSV", "EXCEL", "MYSQL", "TDF", "RFC4180" ],
+            "default" : "CSV"
+          }
+        }
+      }
+    }
+  }
+}
