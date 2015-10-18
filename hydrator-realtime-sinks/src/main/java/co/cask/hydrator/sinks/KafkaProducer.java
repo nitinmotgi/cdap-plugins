@@ -35,8 +35,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 
@@ -97,10 +95,10 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
     topics = sconfig.topics.split(",");
     
     // Configure the properties for kafka.
-    props.put(BROKER_LIST, sconfig.brokerList);
+    props.put(BROKER_LIST, sconfig.brokers);
     props.put(SERIALIZER, "kafka.serializer.StringEncoder");
     props.put(PARTITIONER, "co.cask.hydrator.sinks.ProducerPartitioner");
-    if (sconfig.requireAck.equalsIgnoreCase("TRUE")) {
+    if (sconfig.ackRequired.equalsIgnoreCase("TRUE")) {
       props.put(ACKS_REQUIRED, "1");
     }
     
@@ -191,14 +189,15 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
 
   public static class SinkConfig extends PluginConfig {
     
-    @Name("brokerlist")
+    @Name("brokers")
     @Description("Specifies the connection string where Producer can find one or more brokers to " +
       "determine the leader for each topic")
-    private String brokerList;
+    private String brokers;
     
-    @Name("requireacks")
-    @Description("Tells Kafka that you require an acknowledgement from Broker that message was received")
-    private String requireAck;
+    @Name("ackrequired")
+    @Description("Specifies whether an acknowledgment is required from broker that message was received. " +
+      "Default is FALSE")
+    private String ackRequired;
     
     @Name("partitionfield")
     @Description("Specify field that should be used as partition ID. Should be a int or long")
@@ -217,10 +216,10 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
     private String format;
     
     
-    public SinkConfig(String brokerList, String requireAck, String partitionField, String key, String topics, 
+    public SinkConfig(String brokers, String ackRequired, String partitionField, String key, String topics,
                       String format) {
-      this.brokerList = brokerList;
-      this.requireAck = requireAck;
+      this.brokers = brokers;
+      this.ackRequired = ackRequired;
       this.partitionField = partitionField;
       this.key = key;
       this.topics = topics;
