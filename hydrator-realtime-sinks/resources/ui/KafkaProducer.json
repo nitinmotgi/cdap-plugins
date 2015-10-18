@@ -32,11 +32,19 @@
     },
     "group2" : {
       "display": "Message Config",
-      "position": [ "partitionfield", "key", "format" ],
+      "position": [ "partitioner", "partitionfield", "key", "format" ],
+      "partitioner": {
+        "widget": "select",
+        "label": "Message Partitioner",
+        "properties": {
+          "values": [ "Partition Based", "Round Robin"],
+          "default" : "Partition Based"
+        }
+      },
       "fields": {
         "partitionfield": {
           "widget": "textbox",
-          "label": "Partition Field"
+          "label": "Partition Field (Partition Based)"
         },
         "key": {
           "widget": "textbox",
