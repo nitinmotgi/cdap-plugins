@@ -32,9 +32,11 @@ import kafka.javaapi.producer.Producer;
 import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Properties;
 
@@ -133,27 +135,40 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
         for(Schema.Field field : fields) {
           objs.add(object.get(field.getName()));
         }
-        
+
+        StringWriter writer = new StringWriter();
+        CSVPrinter printer = null;
+        CSVFormat csvFileFormat;
         switch(sconfig.format.toLowerCase()) {
           case "csv":
-            body = CSVFormat.DEFAULT.format(objs);
+            csvFileFormat = CSVFormat.Predefined.Default.getFormat();
+            printer = new CSVPrinter(writer, csvFileFormat);
             break;
           
           case "excel":
-            body = CSVFormat.EXCEL.format(objs);
+            csvFileFormat = CSVFormat.Predefined.Excel.getFormat();
+            printer = new CSVPrinter(writer, csvFileFormat);
             break;
           
           case "mysql":
-            body = CSVFormat.MYSQL.format(objs);
+            csvFileFormat = CSVFormat.Predefined.MySQL.getFormat();
+            printer = new CSVPrinter(writer, csvFileFormat);
             break;
           
           case "tdf":
-            body = CSVFormat.TDF.format(objs);
+            csvFileFormat = CSVFormat.Predefined.TDF.getFormat();
+            printer = new CSVPrinter(writer, csvFileFormat);
             break;
           
           case "rfc4180":
-            body = CSVFormat.RFC4180.format(objs);
+            csvFileFormat = CSVFormat.Predefined.TDF.getFormat();
+            printer = new CSVPrinter(writer, csvFileFormat);
             break;
+        }
+        
+        if (printer != null) {
+          printer.printRecord(objs);
+          body = writer.toString();
         }
       }
       

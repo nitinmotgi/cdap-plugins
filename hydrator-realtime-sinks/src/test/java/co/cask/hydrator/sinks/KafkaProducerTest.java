@@ -5,6 +5,8 @@ import co.cask.cdap.api.data.schema.Schema;
 import co.cask.cdap.etl.api.realtime.RealtimeSink;
 import com.clearspring.analytics.util.Lists;
 import com.google.common.base.Charsets;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.twill.internal.kafka.EmbeddedKafkaServer;
 import org.apache.twill.internal.kafka.client.ZKKafkaClientService;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -71,8 +74,8 @@ public class KafkaProducerTest {
    * @throws Exception in case of any problems. 
    */
   @Test
-  public void testKafkaProducerPublishJSON() throws Exception {
-    String testTopic = "test1";
+  public void testJSONPublish() throws Exception {
+    String testTopic = "json";
 
     KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "JSON");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
@@ -122,21 +125,21 @@ public class KafkaProducerTest {
   }
 
   @Test
-  public void testKafkaProducerPublishCSV() throws Exception {
-    String testTopic = "test2";
+  public void testCSVPublish() throws Exception {
+    String testTopic = "csv";
 
     KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "CSV");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
     kafkaproducer.initialize(new MockRealtimeContext());
 
     List<StructuredRecord> input = Lists.newArrayList();
-    input.add(StructuredRecord.builder(INPUT).set("a", 1L).set("b", "first").set("c", 1).set("d", 12.34)
+    input.add(StructuredRecord.builder(INPUT).set("a", 1L).set("b", "first 1").set("c", 1).set("d", 12.34)
                 .set("e", false).build());
-    input.add(StructuredRecord.builder(INPUT).set("a", 2L).set("b", "second").set("c", 2).set("d", 13.34)
+    input.add(StructuredRecord.builder(INPUT).set("a", 2L).set("b", "second 2").set("c", 2).set("d", 13.34)
                 .set("e", true).build());
-    input.add(StructuredRecord.builder(INPUT).set("a", 3L).set("b", "third").set("c", 3).set("d", 14.34)
+    input.add(StructuredRecord.builder(INPUT).set("a", 3L).set("b", "third 3").set("c", 3).set("d", 14.34)
                 .set("e", false).build());
-    input.add(StructuredRecord.builder(INPUT).set("a", 4L).set("b", "fourth").set("c", 4).set("d", 15.34)
+    input.add(StructuredRecord.builder(INPUT).set("a", 4L).set("b", "fourth 4").set("c", 4).set("d", 15.342423442424)
                 .set("e", true).build());
     kafkaproducer.write(input, null);
 
@@ -165,9 +168,218 @@ public class KafkaProducerTest {
       });
     latch.await();
     Assert.assertEquals(4L, consumedMessages.size());
+    Assert.assertEquals("4,fourth 4,4,15.342423442424,true\r\n", consumedMessages.get(0));
+    Assert.assertEquals("1,first 1,1,12.34,false\r\n", consumedMessages.get(1));
+    Assert.assertEquals("2,second 2,2,13.34,true\r\n", consumedMessages.get(2));
+    Assert.assertEquals("3,third 3,3,14.34,false\r\n", consumedMessages.get(3));
     kafkaproducer.destroy();
   }
 
+  @Test
+  public void testTDFPublish() throws Exception {
+    String testTopic = "tdf";
+
+    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "TDF");
+    RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
+    kafkaproducer.initialize(new MockRealtimeContext());
+
+    List<StructuredRecord> input = Lists.newArrayList();
+    input.add(StructuredRecord.builder(INPUT).set("a", 1L).set("b", "first 1").set("c", 1).set("d", 1.0000332)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 2L).set("b", "second 2").set("c", 2).set("d", 13.34)
+                .set("e", true).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 3L).set("b", "third 3").set("c", 3).set("d", 14.34)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 4L).set("b", "fourth 4").set("c", 4).set("d", 15.342423442424)
+                .set("e", true).build());
+    kafkaproducer.write(input, null);
+
+    final CountDownLatch latch = new CountDownLatch(input.size());
+    final List<String> consumedMessages = new ArrayList<String>(input.size());
+    kafkaClient.getConsumer().prepare()
+      .addFromBeginning(testTopic, 0)
+      .addFromBeginning(testTopic, 1)
+      .addFromBeginning(testTopic, 2)
+      .addFromBeginning(testTopic, 3)
+      .consume(new KafkaConsumer.MessageCallback() {
+        @Override
+        public void onReceived(Iterator<FetchedMessage> messages) {
+          while (messages.hasNext()) {
+            FetchedMessage msg = messages.next();
+            // Add to array with partition id as index.
+            consumedMessages.add(msg.getTopicPartition().getPartition(),
+                                 Charsets.UTF_8.decode(msg.getPayload()).toString());
+            latch.countDown();
+          }
+        }
+
+        @Override
+        public void finished() {
+        }
+      });
+    latch.await();
+    Assert.assertEquals(4L, consumedMessages.size());
+    Assert.assertEquals("4\tfourth 4\t4\t15.342423442424\ttrue\r\n", consumedMessages.get(0));
+    Assert.assertEquals("1\tfirst 1\t1\t1.0000332\tfalse\r\n", consumedMessages.get(1));
+    Assert.assertEquals("2\tsecond 2\t2\t13.34\ttrue\r\n", consumedMessages.get(2));
+    Assert.assertEquals("3\tthird 3\t3\t14.34\tfalse\r\n", consumedMessages.get(3));
+    kafkaproducer.destroy();
+  }
+
+  @Test
+  public void testExcelPublish() throws Exception {
+    String testTopic = "excel";
+
+    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "EXCEL");
+    RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
+    kafkaproducer.initialize(new MockRealtimeContext());
+
+    List<StructuredRecord> input = Lists.newArrayList();
+    input.add(StructuredRecord.builder(INPUT).set("a", 1L).set("b", "first 1").set("c", 1).set("d", 1.0000332)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 2L).set("b", "second 2").set("c", 2).set("d", 13.34)
+                .set("e", true).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 3L).set("b", "third 3").set("c", 3).set("d", 14.34)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 4L).set("b", "fourth 4").set("c", 4).set("d", 15.342423442424)
+                .set("e", true).build());
+    kafkaproducer.write(input, null);
+
+    final CountDownLatch latch = new CountDownLatch(input.size());
+    final List<String> consumedMessages = new ArrayList<String>(input.size());
+    kafkaClient.getConsumer().prepare()
+      .addFromBeginning(testTopic, 0)
+      .addFromBeginning(testTopic, 1)
+      .addFromBeginning(testTopic, 2)
+      .addFromBeginning(testTopic, 3)
+      .consume(new KafkaConsumer.MessageCallback() {
+        @Override
+        public void onReceived(Iterator<FetchedMessage> messages) {
+          while (messages.hasNext()) {
+            FetchedMessage msg = messages.next();
+            // Add to array with partition id as index.
+            consumedMessages.add(msg.getTopicPartition().getPartition(),
+                                 Charsets.UTF_8.decode(msg.getPayload()).toString());
+            latch.countDown();
+          }
+        }
+
+        @Override
+        public void finished() {
+        }
+      });
+    latch.await();
+    Assert.assertEquals(4L, consumedMessages.size());
+    Assert.assertEquals("4,fourth 4,4,15.342423442424,true\r\n", consumedMessages.get(0));
+    Assert.assertEquals("1,first 1,1,1.0000332,false\r\n", consumedMessages.get(1));
+    Assert.assertEquals("2,second 2,2,13.34,true\r\n", consumedMessages.get(2));
+    Assert.assertEquals("3,third 3,3,14.34,false\r\n", consumedMessages.get(3));
+    kafkaproducer.destroy();
+  }
+
+  @Test
+  public void testMySQLPublish() throws Exception {
+    String testTopic = "mysql";
+
+    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "MYSQL");
+    RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
+    kafkaproducer.initialize(new MockRealtimeContext());
+
+    List<StructuredRecord> input = Lists.newArrayList();
+    input.add(StructuredRecord.builder(INPUT).set("a", 1L).set("b", "first 1").set("c", 1).set("d", 1.0000332)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 2L).set("b", "second 2").set("c", 2).set("d", 13.34)
+                .set("e", true).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 3L).set("b", "third 3").set("c", 3).set("d", 14.34)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 4L).set("b", "fourth 4").set("c", 4).set("d", 15.342423442424)
+                .set("e", true).build());
+    kafkaproducer.write(input, null);
+
+    final CountDownLatch latch = new CountDownLatch(input.size());
+    final List<String> consumedMessages = new ArrayList<String>(input.size());
+    kafkaClient.getConsumer().prepare()
+      .addFromBeginning(testTopic, 0)
+      .addFromBeginning(testTopic, 1)
+      .addFromBeginning(testTopic, 2)
+      .addFromBeginning(testTopic, 3)
+      .consume(new KafkaConsumer.MessageCallback() {
+        @Override
+        public void onReceived(Iterator<FetchedMessage> messages) {
+          while (messages.hasNext()) {
+            FetchedMessage msg = messages.next();
+            // Add to array with partition id as index.
+            consumedMessages.add(msg.getTopicPartition().getPartition(),
+                                 Charsets.UTF_8.decode(msg.getPayload()).toString());
+            latch.countDown();
+          }
+        }
+
+        @Override
+        public void finished() {
+        }
+      });
+    latch.await();
+    Assert.assertEquals(4L, consumedMessages.size());
+    Assert.assertEquals("4\tfourth 4\t4\t15.342423442424\ttrue\n", consumedMessages.get(0));
+    Assert.assertEquals("1\tfirst 1\t1\t1.0000332\tfalse\n", consumedMessages.get(1));
+    Assert.assertEquals("2\tsecond 2\t2\t13.34\ttrue\n", consumedMessages.get(2));
+    Assert.assertEquals("3\tthird 3\t3\t14.34\tfalse\n", consumedMessages.get(3));
+    kafkaproducer.destroy();
+  }
+
+  @Test
+  public void testRFC4180Publish() throws Exception {
+    String testTopic = "rfc4180";
+
+    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, 
+                                                                    "rfc4180");
+    RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
+    kafkaproducer.initialize(new MockRealtimeContext());
+
+    List<StructuredRecord> input = Lists.newArrayList();
+    input.add(StructuredRecord.builder(INPUT).set("a", 1L).set("b", "first 1").set("c", 1).set("d", 1.0000332)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 2L).set("b", "second 2").set("c", 2).set("d", 13.34)
+                .set("e", true).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 3L).set("b", "third 3").set("c", 3).set("d", 14.34)
+                .set("e", false).build());
+    input.add(StructuredRecord.builder(INPUT).set("a", 4L).set("b", "fourth 4").set("c", 4).set("d", 15.342423442424)
+                .set("e", true).build());
+    kafkaproducer.write(input, null);
+
+    final CountDownLatch latch = new CountDownLatch(input.size());
+    final List<String> consumedMessages = new ArrayList<String>(input.size());
+    kafkaClient.getConsumer().prepare()
+      .addFromBeginning(testTopic, 0)
+      .addFromBeginning(testTopic, 1)
+      .addFromBeginning(testTopic, 2)
+      .addFromBeginning(testTopic, 3)
+      .consume(new KafkaConsumer.MessageCallback() {
+        @Override
+        public void onReceived(Iterator<FetchedMessage> messages) {
+          while (messages.hasNext()) {
+            FetchedMessage msg = messages.next();
+            // Add to array with partition id as index.
+            consumedMessages.add(msg.getTopicPartition().getPartition(),
+                                 Charsets.UTF_8.decode(msg.getPayload()).toString());
+            latch.countDown();
+          }
+        }
+
+        @Override
+        public void finished() {
+        }
+      });
+    latch.await();
+    Assert.assertEquals(4L, consumedMessages.size());
+    Assert.assertEquals("4\tfourth 4\t4\t15.342423442424\ttrue\r\n", consumedMessages.get(0));
+    Assert.assertEquals("1\tfirst 1\t1\t1.0000332\tfalse\r\n", consumedMessages.get(1));
+    Assert.assertEquals("2\tsecond 2\t2\t13.34\ttrue\r\n", consumedMessages.get(2));
+    Assert.assertEquals("3\tthird 3\t3\t14.34\tfalse\r\n", consumedMessages.get(3));
+    kafkaproducer.destroy();
+  }  
+  
   @BeforeClass
   public static void beforeClass() throws IOException {
     zkServer = InMemoryZKServer.builder().setDataDir(TMP_FOLDER.newFolder()).build();
