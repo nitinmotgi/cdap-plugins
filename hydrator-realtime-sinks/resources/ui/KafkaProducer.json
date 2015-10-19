@@ -4,7 +4,7 @@
     "position": [ "group1", "group2" ],
     "group1": {
       "display": "Kafka Producer and Topic Config",
-      "position": [ "brokers", "topics", "ackrequired" ],
+      "position": [ "brokers", "topics", "isasync" ],
       "fields": {
         "brokers": {
           "widget": "csv",
@@ -20,9 +20,9 @@
             "delimiter": ","
           }
         },
-        "ackrequired": {
+        "iasync": {
           "widget": "select",
-          "label": "Acknowledge Message",
+          "label": "Is Async ?",
           "properties": {
             "values" : [ "TRUE", "FALSE" ],
             "default": "FALSE"

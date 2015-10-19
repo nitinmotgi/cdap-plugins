@@ -33,6 +33,9 @@ import kafka.producer.KeyedMessage;
 import kafka.producer.ProducerConfig;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.kafka.clients.producer.Callback;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +52,13 @@ import java.util.Properties;
 @Description("Real-time Kafka producer")
 public class KafkaProducer extends RealtimeSink<StructuredRecord> {
   private static final Logger LOG = LoggerFactory.getLogger(KafkaProducer.class);
-  private static final String BROKER_LIST = "metadata.broker.list";
-  private static final String SERIALIZER = "serializer.class";
-  private static final String PARTITIONER = "partitioner.class";
+  private static final String BROKER_LIST = "bootstrap.servers"; //"metadata.broker.list";
+  private static final String KEY_SERIALIZER = "key.serializer";
+  private static final String VAL_SERIALIZER = "value.serializer";
+  private static final String CLIENT_ID = "client.id";
   private static final String ACKS_REQUIRED = "request.required.acks";
   
-  private final SinkConfig sconfig;
+  private final Config sconfig;
   
   // Kafka properties
   private final Properties props = new Properties();
@@ -63,7 +67,7 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
   private ProducerConfig config;
   
   // Kafka producer handle
-  private Producer<String, String> producer;
+  private org.apache.kafka.clients.producer.KafkaProducer<String, String> producer;
   
   // Plugin context
   private RealtimeContext context;
@@ -72,12 +76,14 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
   // is not available during initialization and configuration phase.
   private boolean fieldsExtracted = false;
   
+  // If Async mode
+  private boolean isAsync = false;
+  
   // List of Kafka topics.
   private String[] topics;
   
-  
   // required for testing.
-  public KafkaProducer(SinkConfig config) {
+  public KafkaProducer(Config config) {
     this.sconfig = config;
   }
 
@@ -98,18 +104,21 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
     
     // Configure the properties for kafka.
     props.put(BROKER_LIST, sconfig.brokers);
-    props.put(SERIALIZER, "kafka.serializer.StringEncoder");
-    props.put(PARTITIONER, "co.cask.hydrator.sinks.ProducerPartitioner");
-    if (sconfig.ackRequired.equalsIgnoreCase("TRUE")) {
+    props.put(KEY_SERIALIZER, "org.apache.kafka.common.serialization.StringSerializer");
+    props.put(VAL_SERIALIZER, "org.apache.kafka.common.serialization.StringSerializer");
+    props.put(CLIENT_ID, "kafka-producer-" + context.getInstanceId());
+    if (sconfig.isAsync.equalsIgnoreCase("TRUE")) {
       props.put(ACKS_REQUIRED, "1");
+      isAsync = true;
     }
     
-    config = new ProducerConfig(props);
-    producer = new Producer<String, String>(config);
+    //config = new ProducerConfig(props);
+    producer = new org.apache.kafka.clients.producer.KafkaProducer<String, String>(props);
+    
   }
   
   @Override
-  public int write(Iterable<StructuredRecord> objects, DataWriter dataWriter) throws Exception { 
+  public int write(Iterable<StructuredRecord> objects, final DataWriter dataWriter) throws Exception {
     int count = 0;
 
     List<Schema.Field> fields = Lists.newArrayList();
@@ -181,17 +190,36 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
       // Extract the partition key from the record
       Integer partitionKey = 0;
       if(sconfig.partitionField != null) {
-        partitionKey = object.get(sconfig.partitionField);
+        if(object.get(sconfig.partitionField).getClass().isInstance(Integer.class)) {
+          partitionKey = object.get(sconfig.partitionField);  
+        } else {
+          partitionKey = object.get(sconfig.partitionField).hashCode();
+        }
       }
 
       // Write to all the configured topics
       for(String topic : topics) {
-        KeyedMessage<String, String> data = new KeyedMessage<String, String>(topic, key, partitionKey, body);
-        producer.send(data);
+        partitionKey = partitionKey % producer.partitionsFor(topic).size();
+        if (isAsync) {
+          producer.send(new ProducerRecord<String, String>(topic, partitionKey, key, body), new Callback() {
+            @Override
+            public void onCompletion(RecordMetadata meta, Exception e) {
+              if (meta != null) {
+                context.getMetrics().count("kafka.async.success", 1);
+              }
+              
+              if (e != null) {
+                context.getMetrics().count("kafka.async.error", 1);  
+              }
+            }
+          });
+        } else {
+          // Waits infinitely to push the message through. 
+          producer.send(new ProducerRecord<String, String>(topic, partitionKey, key, body)).get();
+        }
+        context.getMetrics().count("kafka.producer.count", 1);
       }
-      
     }
-    context.getMetrics().count("kafka.producer.count", count);
     return count;
   }
 
@@ -202,17 +230,17 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
     producer.close();
   }
 
-  public static class SinkConfig extends PluginConfig {
+  public static class Config extends PluginConfig {
     
     @Name("brokers")
     @Description("Specifies the connection string where Producer can find one or more brokers to " +
       "determine the leader for each topic")
     private String brokers;
     
-    @Name("ackrequired")
+    @Name("isasync")
     @Description("Specifies whether an acknowledgment is required from broker that message was received. " +
       "Default is FALSE")
-    private String ackRequired;
+    private String isAsync;
     
     @Name("partitionfield")
     @Description("Specify field that should be used as partition ID. Should be a int or long")
@@ -231,10 +259,10 @@ public class KafkaProducer extends RealtimeSink<StructuredRecord> {
     private String format;
     
     
-    public SinkConfig(String brokers, String ackRequired, String partitionField, String key, String topics,
-                      String format) {
+    public Config(String brokers, String isAsync, String partitionField, String key, String topics,
+                  String format) {
       this.brokers = brokers;
-      this.ackRequired = ackRequired;
+      this.isAsync = isAsync;
       this.partitionField = partitionField;
       this.key = key;
       this.topics = topics;

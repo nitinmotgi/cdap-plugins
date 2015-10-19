@@ -5,9 +5,6 @@ import co.cask.cdap.api.data.schema.Schema;
 import co.cask.cdap.etl.api.realtime.RealtimeSink;
 import com.clearspring.analytics.util.Lists;
 import com.google.common.base.Charsets;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.twill.internal.kafka.EmbeddedKafkaServer;
 import org.apache.twill.internal.kafka.client.ZKKafkaClientService;
 import org.apache.twill.internal.utils.Networks;
@@ -27,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -77,7 +73,7 @@ public class KafkaProducerTest {
   public void testJSONPublish() throws Exception {
     String testTopic = "json";
 
-    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "JSON");
+    KafkaProducer.Config sconfig = new KafkaProducer.Config(getBroker(), "TRUE", "c", "b", testTopic, "JSON");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
     kafkaproducer.initialize(new MockRealtimeContext());
     
@@ -128,7 +124,7 @@ public class KafkaProducerTest {
   public void testCSVPublish() throws Exception {
     String testTopic = "csv";
 
-    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "CSV");
+    KafkaProducer.Config sconfig = new KafkaProducer.Config(getBroker(), "FALSE", "c", "b", testTopic, "CSV");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
     kafkaproducer.initialize(new MockRealtimeContext());
 
@@ -179,7 +175,7 @@ public class KafkaProducerTest {
   public void testTDFPublish() throws Exception {
     String testTopic = "tdf";
 
-    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "TDF");
+    KafkaProducer.Config sconfig = new KafkaProducer.Config(getBroker(), "TRUE", "c", "b", testTopic, "TDF");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
     kafkaproducer.initialize(new MockRealtimeContext());
 
@@ -230,7 +226,7 @@ public class KafkaProducerTest {
   public void testExcelPublish() throws Exception {
     String testTopic = "excel";
 
-    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "EXCEL");
+    KafkaProducer.Config sconfig = new KafkaProducer.Config(getBroker(), "FALSE", "c", "b", testTopic, "EXCEL");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
     kafkaproducer.initialize(new MockRealtimeContext());
 
@@ -281,7 +277,7 @@ public class KafkaProducerTest {
   public void testMySQLPublish() throws Exception {
     String testTopic = "mysql";
 
-    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, "MYSQL");
+    KafkaProducer.Config sconfig = new KafkaProducer.Config(getBroker(), "TRUE", "c", "b", testTopic, "MYSQL");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
     kafkaproducer.initialize(new MockRealtimeContext());
 
@@ -332,7 +328,7 @@ public class KafkaProducerTest {
   public void testRFC4180Publish() throws Exception {
     String testTopic = "rfc4180";
 
-    KafkaProducer.SinkConfig sconfig = new KafkaProducer.SinkConfig(getBroker(), "TRUE", "c", "b", testTopic, 
+    KafkaProducer.Config sconfig = new KafkaProducer.Config(getBroker(), "FALSE", "c", "b", testTopic,
                                                                     "rfc4180");
     RealtimeSink<StructuredRecord> kafkaproducer = new KafkaProducer(sconfig);
     kafkaproducer.initialize(new MockRealtimeContext());

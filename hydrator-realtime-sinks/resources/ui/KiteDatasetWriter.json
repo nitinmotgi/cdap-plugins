@@ -1,0 +1,18 @@
+{
+  "id": "KiteDatasetWriter",
+  "groups": {
+    "position": [ "group1" ],
+    "group1": {
+      "display": "Kite Dataset Configuration",
+      "position": [
+        "uri"
+      ],
+      "fields": {
+        "uri": {
+          "widget": "text",
+          "label": "Kite Dataset URI"
+        }
+      }
+    }
+  }
+}
