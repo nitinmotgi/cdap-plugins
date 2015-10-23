@@ -67,18 +67,27 @@ public class KiteDatasetWriter extends RealtimeSink<StructuredRecord> {
       
       // This could be in initialize if there is a way to get input and output schema
       if (!writerInitialized) {
-        if (! Datasets.exists(config.uri)) {
-          DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
-            .schema(genericRecord.getSchema()).build();
-          dataset = Datasets.create(config.uri, descriptor);
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        try {
+          Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+          if (!Datasets.exists(config.uri)) {
+            DatasetDescriptor descriptor = new DatasetDescriptor.Builder()
+              .schema(genericRecord.getSchema()).build();
+            dataset = Datasets.create(config.uri, descriptor);
+          }
+          writer = dataset.newWriter();
+        } finally {
+          Thread.currentThread().setContextClassLoader(cl);
+          writerInitialized = true;
         }
-        writer = dataset.newWriter();
-        writerInitialized = true;
       }
       
       // Writes the record to kite dataset.
-      writer.write(genericRecord);
-      count++;
+      if(writer != null) {
+        writer.write(genericRecord);
+        count++;
+      }
+      
     }
     
     return count;
