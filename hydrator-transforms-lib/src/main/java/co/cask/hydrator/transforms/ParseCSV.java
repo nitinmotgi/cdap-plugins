@@ -32,6 +32,8 @@ import co.cask.cdap.etl.api.TransformContext;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,6 +45,7 @@ import java.util.List;
 @Name("CSVParser")
 @Description("Parses a CSV into a Record")
 public final class ParseCSV extends Transform<StructuredRecord, StructuredRecord> {
+  private static final Logger LOG = LoggerFactory.getLogger(ParseCSV.class);
   private final Config config;
   
   // Output Schema associated with transform output. 
@@ -138,11 +141,13 @@ public final class ParseCSV extends Transform<StructuredRecord, StructuredRecord
           StructuredRecord sRecord = createStructuredRecord(record);
           emitter.emit(sRecord);
         } else {
+          LOG.warn("Skipping record as ouput schema specified has '{}' fields, while CSV record has '{}'",
+                     fields.size(), record.size());
           // Write the record to error Dataset.
         }
       }
-    } catch (IOException e) {
-
+    } catch (IOException e) { 
+      LOG.error("There was a issue parsing the record. ", e.getLocalizedMessage());
     }
   }
 

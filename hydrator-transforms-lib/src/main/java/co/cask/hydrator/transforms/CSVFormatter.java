@@ -14,9 +14,7 @@
  * the License.
  */
 
-
 package co.cask.hydrator.transforms;
-
 
 import co.cask.cdap.api.annotation.Description;
 import co.cask.cdap.api.annotation.Name;
@@ -29,7 +27,6 @@ import co.cask.cdap.etl.api.Emitter;
 import co.cask.cdap.etl.api.PipelineConfigurer;
 import co.cask.cdap.etl.api.Transform;
 import co.cask.cdap.etl.api.TransformContext;
-import co.cask.cdap.etl.common.StructuredRecordStringConverter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.csv.CSVFormat;
@@ -43,13 +40,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A Transformation that parses a text into CSV Fields.
+ * Transform that transforms a structured record into a CSV Record. 
  */
 @Plugin(type = "transform")
 @Name("CSVFormatter")
 @Description("Formats a Structure Record into CSV")
 public final class CSVFormatter extends Transform<StructuredRecord, StructuredRecord> {
   private static final Logger LOG = LoggerFactory.getLogger(CSVFormatter.class);
+  
+  // Transform configuraiton.
   private final Config config;
 
   // Output Schema associated with transform output.
@@ -58,32 +57,70 @@ public final class CSVFormatter extends Transform<StructuredRecord, StructuredRe
   // List of fields specified in the schema.
   private List<Field> fields;
 
-  // Delimiter
+  // Delimiter for the field.
   private char delim = ',';
   
-  // Mapping from field, char
-  private static final Map<String, String> delimiterMaps = Maps.newHashMap();
+  // Mapping from delimiter name to the character to be used as delimiter.
+  private static final Map<String, String> delimMap = Maps.newHashMap();
   
   // This is used only for tests, otherwise this is being injected by the ingestion framework.
   public CSVFormatter(Config config) {
     this.config = config;
   }
 
+  // Static collection of delimiter mappings from name to delim. 
   static {
-    delimiterMaps.put("COMMA", ",");
-    delimiterMaps.put("CTRL-A", "\001");
-    delimiterMaps.put("TAB", "\t");
-    delimiterMaps.put("VBAR", "|");
-    delimiterMaps.put("STAR", "*");
-    delimiterMaps.put("CARROT", "^");
-    delimiterMaps.put("DOLLAR", "$");
-    delimiterMaps.put("HASH", "#");
-    delimiterMaps.put("TILDE", "~");
-    delimiterMaps.put("CTRL-B", "\002");
-    delimiterMaps.put("CTRL-C", "\003");
-    delimiterMaps.put("CTRL-D", "\004");
-    delimiterMaps.put("CTRL-E", "\005");
-    delimiterMaps.put("CTRL-F", "\006");
+    delimMap.put("COMMA", ",");
+    delimMap.put("CTRL-A", "\001");
+    delimMap.put("TAB", "\t");
+    delimMap.put("VBAR", "|");
+    delimMap.put("STAR", "*");
+    delimMap.put("CARROT", "^");
+    delimMap.put("DOLLAR", "$");
+    delimMap.put("HASH", "#");
+    delimMap.put("TILDE", "~");
+    delimMap.put("CTRL-B", "\002");
+    delimMap.put("CTRL-C", "\003");
+    delimMap.put("CTRL-D", "\004");
+    delimMap.put("CTRL-E", "\005");
+    delimMap.put("CTRL-F", "\006");
+  }
+
+  @Override
+  public void configurePipeline(PipelineConfigurer pipelineConfigurer) throws IllegalArgumentException {
+    super.configurePipeline(pipelineConfigurer);
+    
+    if (!delimMap.containsKey(config.delimiter)) {
+      throw new IllegalArgumentException("Unknown delimiter '" + config.delimiter + "' specified. ");
+    }
+
+    // Check if the format specified is valid.
+    if(config.format == null || config.format.isEmpty()) {
+      throw new IllegalArgumentException("Format is not specified. Allowed values are DELIMITED, EXCEL, MYSQL," +
+                                           " RFC4180 & TDF");
+    }
+
+    if(!config.format.equalsIgnoreCase("DELIMITED") && !config.format.equalsIgnoreCase("EXCEL") &&
+      !config.format.equalsIgnoreCase("MYSQL") && !config.format.equalsIgnoreCase("RFC4180") &&
+      !config.format.equalsIgnoreCase("TDF")) {
+      throw new IllegalArgumentException("Format specified is not one of the allowed values. Allowed values are " +
+                                           "DELIMITED, EXCEL, MYSQL, RFC4180 & TDF");
+    }
+
+    // Check if schema specified is a valid schema or no. 
+    try {
+      Schema schema = Schema.parseJson(config.schema);
+      List<Schema.Field> fields = schema.getFields();
+      if (fields.size() > 1) {
+        throw new IllegalArgumentException("Output schema should have only one field of type String");
+      }
+      if(fields.get(0).getSchema().getType() != Schema.Type.STRING) {
+        throw new IllegalArgumentException("Output field type should be String");
+      }
+    } catch (IOException e) {
+      throw new IllegalArgumentException("Format of schema specified is invalid. Please check the format.");
+    }
+
   }
   
   @Override
@@ -97,104 +134,63 @@ public final class CSVFormatter extends Transform<StructuredRecord, StructuredRe
       throw new IllegalArgumentException("Format of schema specified is invalid. Please check the format.");
     }
     
-    if(delimiterMaps.containsKey(config.delimiter)) {
-      delim = delimiterMaps.get(config.delimiter).charAt(0);
+    // Based on the delimiter name specified pick the delimiter to be used for the record. 
+    // This is only applicable when the format type is choosen as DELIMITER
+    if(delimMap.containsKey(config.delimiter)) {
+      delim = delimMap.get(config.delimiter).charAt(0);
     }
   }
-
-  @Override
-  public void configurePipeline(PipelineConfigurer pipelineConfigurer) throws IllegalArgumentException {
-    super.configurePipeline(pipelineConfigurer);
-    
-    if (!delimiterMaps.containsKey(config.delimiter)) {
-      throw new IllegalArgumentException("Unknown delimiter '" + config.delimiter + "' specified. ");
-    }
-    
-    // Check if the format specified is valid.
-    if(config.format == null || config.format.isEmpty()) {
-      throw new IllegalArgumentException("Format is not specified. Allowed values are DEFAULT, EXCEL, MYSQL," +
-                                           " RFC4180 & TDF");
-    }
-    
-    if(!config.format.equalsIgnoreCase("DELIMITER") && !config.format.equalsIgnoreCase("EXCEL") &&
-        !config.format.equalsIgnoreCase("MYSQL") && !config.format.equalsIgnoreCase("RFC4180") &&
-        !config.format.equalsIgnoreCase("TDF")) {
-      throw new IllegalArgumentException("Format specified is not one of the allowed values. Allowed values are " +
-                                           "DELIMITER, EXCEL, MYSQL, RFC4180 & TDF");
-    }
-    
-    // Check if schema specified is a valid schema or no. 
-    try {
-      Schema schema = Schema.parseJson(config.schema);
-      List<Schema.Field> fields = schema.getFields();
-      if (fields.size() > 1) {
-        throw new IllegalArgumentException("Output schema should have only one field of type String");
-      }
-      if(fields.get(0).getSchema().getType() != Schema.Type.STRING) {
-        throw new IllegalArgumentException("Output field type should be String");  
-      }
-    } catch (IOException e) {
-      throw new IllegalArgumentException("Format of schema specified is invalid. Please check the format.");
-    }
-    
-  }
-
+  
   @Override
   public void transform(StructuredRecord record, Emitter<StructuredRecord> emitter) throws Exception {
-    String body = "";
-    if (config.format.equalsIgnoreCase("JSON")) {
-      body = StructuredRecordStringConverter.toJsonString(record);
-    } else {
-      // Extract all values from the structured record
-      List<Object> objs = Lists.newArrayList();
-      for(Schema.Field field : fields) {
-        objs.add(record.get(field.getName()));
-      }
-
-      StringWriter writer = new StringWriter();
-      CSVPrinter printer = null;
-      CSVFormat csvFileFormat = null;
-      switch(config.format.toLowerCase()) {
-        case "delimiter":
-          LOG.info("Delimiter type " + delim);
-          csvFileFormat = CSVFormat.newFormat(delim).withQuote('"')
-            .withRecordSeparator("\r\n").withIgnoreEmptyLines();
-          printer = new CSVPrinter(writer, csvFileFormat);
-          break;
-
-        case "excel":
-          csvFileFormat = CSVFormat.Predefined.Excel.getFormat();
-          printer = new CSVPrinter(writer, csvFileFormat);
-          break;
-
-        case "mysql":
-          csvFileFormat = CSVFormat.Predefined.MySQL.getFormat();
-          printer = new CSVPrinter(writer, csvFileFormat);
-          break;
-
-        case "tdf":
-          csvFileFormat = CSVFormat.Predefined.TDF.getFormat();
-          printer = new CSVPrinter(writer, csvFileFormat);
-          break;
-
-        case "rfc4180":
-          csvFileFormat = CSVFormat.Predefined.TDF.getFormat();
-          printer = new CSVPrinter(writer, csvFileFormat);
-          break;
-      }
-      
-      if (printer != null) {
-        printer.printRecord(objs);
-        body = writer.toString();
-      }
+    String csvRecord = "";
+    
+    List<Object> values = Lists.newArrayList();
+    for(Schema.Field field : record.getSchema().getFields()) {
+      values.add(record.get(field.getName()));
     }
 
-    emitter.emit(StructuredRecord.builder(outSchema)
-      .set(outSchema.getFields().get(0).getName(), body)
-      .build());
+    StringWriter writer = new StringWriter();
+    CSVPrinter printer = null;
+    CSVFormat csvFileFormat = null;
+    
+    switch(config.format.toLowerCase()) {
+      case "delimited":
+        csvFileFormat = CSVFormat.newFormat(delim).withQuote('"')
+          .withRecordSeparator("\r\n").withIgnoreEmptyLines();
+        printer = new CSVPrinter(writer, csvFileFormat);
+        break;
+
+      case "excel":
+        csvFileFormat = CSVFormat.Predefined.Excel.getFormat();
+        printer = new CSVPrinter(writer, csvFileFormat);
+        break;
+
+      case "mysql":
+        csvFileFormat = CSVFormat.Predefined.MySQL.getFormat();
+        printer = new CSVPrinter(writer, csvFileFormat);
+        break;
+
+      case "tdf":
+        csvFileFormat = CSVFormat.Predefined.TDF.getFormat();
+        printer = new CSVPrinter(writer, csvFileFormat);
+        break;
+
+      case "rfc4180":
+        csvFileFormat = CSVFormat.Predefined.TDF.getFormat();
+        printer = new CSVPrinter(writer, csvFileFormat);
+        break;
+    }
+    
+    if (printer != null) {
+      printer.printRecord(values);
+      csvRecord = writer.toString();
+      emitter.emit(StructuredRecord.builder(outSchema)
+                     .set(outSchema.getFields().get(0).getName(), csvRecord)
+                     .build());
+    }
+    
   }
-
-
 
   /**
    * Configuration for the plugin.

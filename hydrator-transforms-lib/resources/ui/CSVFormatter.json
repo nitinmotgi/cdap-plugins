@@ -19,8 +19,8 @@
           "widget": "select",
           "label": "Formats",
           "properties": {
-            "values" : [ "DELIMITER", "EXCEL", "MYSQL", "RFC4180", "TDF", "JSON" ],
-            "default": "DELIMITER"
+            "values" : [ "DELIMITED", "EXCEL", "MYSQL", "RFC4180", "TDF" ],
+            "default": "DELIMITED"
           }
         },
         "schema" : {
